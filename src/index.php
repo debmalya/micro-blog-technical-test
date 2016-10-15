@@ -1,7 +1,6 @@
 <?php
 
 // Silex documentation: http://silex.sensiolabs.org/doc/
-
 require_once __DIR__.'/../vendor/autoload.php';
 
 $app = new Silex\Application();
