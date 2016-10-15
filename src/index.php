@@ -57,12 +57,19 @@ $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
 $app->get('/api/posts/id/{post_id}', function($post_id) use($app) {
   $sql = "SELECT rowid, * FROM posts WHERE rowid = ?";
   $post = $app['db']->fetchAssoc($sql, array((int) $post_id));
-
+	
+	if (!isset($post[rowid])) {
+        return $app->json("Not Found", 404);
+    }
+ 
   return $app->json($post, 200);
 });
 
 $app->post('/api/posts/new', function (Request $request) {
   //TODO
+  $sql = "INSERT INTO posts (content, user_id, date) VALUES (?,?,?)";
+//   $user_id = $request->request->get('user_id');
+//   $request->attributes->get('slug')
 });
 
 
