@@ -1,5 +1,7 @@
 <?php
 
+
+
 // Silex documentation: http://silex.sensiolabs.org/doc/
 require_once __DIR__.'/../vendor/autoload.php';
 
@@ -12,11 +14,28 @@ $app['debug'] = true;
 TODO: Add a users table to sqlite db
 */
 
+
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
     'db.options' => array(
         'driver'   => 'pdo_sqlite',
         'path'     => __DIR__.'/app.db',
     ),
+   
+   	/*
+    $sql = "CREATE TABLE IF NOT EXISTS users (user_id integer primary key autoincrement, user_name varchar(255) not null)";
+	$app['db']->executeQuery($sql);
+	 
+	$blog_users = array(
+		array("id" => 0, "name" => "One"),
+		array("id" => 1, "name" => "Two"),
+		array("id" => 2, "name" => "Three"),
+		array("id" => 3, "name" => "Four"),
+	);
+
+	for ($i = 0; $i < count($blog_users); $i++) {
+		$app['db']->insert('users', $blog_users[$i]);
+	}
+	*/
 ));
 
 // Twig template engine config
@@ -50,6 +69,9 @@ $app->get('/api/posts', function() use($app) {
 $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
     $sql = "SELECT rowid, * FROM posts WHERE user_id = ?";
     $posts = $app['db']->fetchAll($sql, array((int) $user_id));
+    if (count($posts) == 0) {
+        return $app->json("User id $user_id does not exist.", 404);
+    }
 
     return $app->json($posts, 200);
 });
@@ -59,7 +81,7 @@ $app->get('/api/posts/id/{post_id}', function($post_id) use($app) {
   $post = $app['db']->fetchAssoc($sql, array((int) $post_id));
 	
 	if (!isset($post[rowid])) {
-        return $app->json("Not Found", 404);
+        return $app->json("Post id $post_id does not exist.", 404);
     }
  
   return $app->json($post, 200);
@@ -88,5 +110,8 @@ $app->get('/', function() use($app) {
   return $app['twig']->render('index.twig');
 });
 
+$app->error(function (\Exception $e, $code) {
+    return new Response('I am sorry, but something went terribly wrong.');
+});
 
 $app->run();
