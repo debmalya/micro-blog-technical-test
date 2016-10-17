@@ -72,7 +72,7 @@ $app->get('/api/posts', function() use($app) {
         return new Response("There is no post.", 404);
     }
     
-    return $app->json($posts, 200);
+	return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
 });
 
 $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
