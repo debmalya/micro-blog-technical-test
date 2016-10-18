@@ -200,6 +200,13 @@ $app->put('/api/posts/update', function (Request $request) use ($app){
     return $app->json($posts, 200);
 }); 
 
+$app->put('/api/formattedposts/update', function (Request $request) use ($app){
+    $post_id = $request->request->get('post_id');
+    $content = $request->request->get('content');
+    $sql = "UPDATE posts SET content = :content WHERE rowid = :rowid";
+	$app['db']->executeUpdate($sql, array($content,(int)$post_id));
+    return $app['twig']->render('index.twig', array('message'=>'Blog updated successfully.'));
+}); 
 /**
  * To delete existing post.
  * From request parameter get post_id and content.
