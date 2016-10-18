@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="/assets/css/w3.css">
         <script type="text/javascript" src="/assets/javascripts/functionality1.js"></script> 
         <script type="text/javascript" src="/assets/javascripts/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript" src="/assets/javascripts/blog_controller9.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/blog_controller15.js"></script>
         <script type="text/javascript" src="/assets/javascripts/w3data14.js"></script> 
     </head>
     <body>
@@ -19,10 +19,15 @@
   <a href="javascript:void(0)" class="w3-closenav w3-large" id="mySideNavClose" onclick="w3_close()">Close &times;</a>
   <a href="/api/formattedposts/twig" id="viewAllPosts">View all posts</a>
   <a href="/api/formattedusers/twig" id="viewAllUsers">View all users</a>
-  <a href="#" id="viewIndividualPost">View an individual post</a> 
+  <a href="/api/formatted/postid/twig" id="viewIndividualPost">View an individual post</a> 
   <a href="/api/prepareNewPost/twig">Create a simple post</a> 
-  <a href="#">Update a simple post</a> 
-  <a href="#">Delete a simple post</a> 
+  <a href="/api/formatted/postid/update/twig">Update a simple post</a> 
+  <a href="/api/formatted/postid/delete/twig">Delete a simple post</a> 
 </nav>
+<div class="w3-container w3-teal">
+	{% if message is defined %}
+		{{message}}
+	{% endif %}
+</div>
 
 

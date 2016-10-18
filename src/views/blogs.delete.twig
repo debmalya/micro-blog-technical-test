@@ -1,0 +1,13 @@
+
+{% include 'header.twig' %}        
+<div class="w3-container"> 
+            <input class="w3-input w3-border w3-padding" type="text" placeholder="Search for blogs.." id="myInput">
+            		{% if posts|length > 0 %}
+            			<ul id="id01" class="w3-ul w3-border">
+								{% for post in posts %}
+									<li>Post Id: {{post.rowid}} <br> {{ post.content|nl2br }} <br> published at {{ post.date is empty ? "" : post.date|date("d/m/Y","Europe/London") }}</li>
+								{% endfor %} 
+						</ul>
+					{% endif %} 
+</div>
+{% include 'footer.twig' %}

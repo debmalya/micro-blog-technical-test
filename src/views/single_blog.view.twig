@@ -1,5 +1,5 @@
 {% include 'header.twig' %}        
-<form class="w3-container" action="/api/formattedposts/delete/" method="POST" id="deleteSimplePost">
+<form class="w3-container" action="/api/posts/update" method="POST">
 					<div><label>Select Post</label> 
             		{% if posts|length > 0 %}
             			<select id="post_id" class="w3-ul w3-border" name="post_id">
@@ -10,10 +10,6 @@
 						</div>
 					<div>
 						<textarea name="content" id="content" rows="5" cols="40">Blog will appear here.</textarea>
-					</div>
-					<div>
-						<input type="hidden" id="_method" name="_method" value="DELETE" />
-						<input type="submit" value="Delete Post">
 					</div>
 					{% else %}
 						<p> No post available</p>
