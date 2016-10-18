@@ -1,0 +1,13 @@
+
+{% include 'header.twig' %}        
+<div class="w3-container"> 
+            <input class="w3-input w3-border w3-padding" type="text" placeholder="Search for users.." id="userSearch">
+            		{% if users|length > 0 %}
+            			<ul id="idUserList" class="w3-ul w3-border">
+								{% for users in users %}
+									<li>{{ users.user_name|e }}</li>
+								{% endfor %} 
+						</ul>
+					{% endif %} 
+</div>
+{% include 'footer.twig' %}

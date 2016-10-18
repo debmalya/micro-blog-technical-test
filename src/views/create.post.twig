@@ -1,0 +1,23 @@
+
+{% include 'header.twig' %}        
+<form class="w3-container" action="/api/posts/new" method="POST">
+					<div><label>Select User</label> 
+            		{% if users|length > 0 %}
+            			<select id="user_id" class="w3-ul w3-border" name="user_id">
+								{% for users in users %}
+									<option value="{{ users.user_id }}">{{ users.user_name|e }}</option>
+								{% endfor %} 
+						</select>
+					{% else %}
+						<p> No user available</p>
+					{% endif %} 
+					</div>
+					<div>
+						<textarea name="content" id="content" rows="5" cols="40">Enter your blog here</textarea>
+					</div>
+					<div>
+						<input type="submit" value="Create Post">
+					</div>
+					
+</form>
+{% include 'footer.twig' %}

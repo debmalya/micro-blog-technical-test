@@ -1,33 +1,5 @@
-
-
-        <!--
-          TODO: Build the front-end for the micro-blog using a front-end framework
-                of your choice.
-    
-                Suggested approach:
-                - Use jquery to make ajax requests to the API endpoints in src/index.php
-                - Use the Bootstrap front-end framework for css and any of the js
-                  components it includes as you see fit
-                - In particular Bootstrap's grid system for layout
-    
-          OPTIONAL: You may make use of any extra features of the TWIG template engine
-                    if you wish (see: http://twig.sensiolabs.org/)
-    
-        -->
 {% include 'header.twig' %}        
-<!-- Side Navigation -->
-<nav class="w3-sidenav w3-white" style="display:none" id="mySidenav">
-  <a href="javascript:void(0)" class="w3-closenav w3-large" id="mySideNavClose" onclick="w3_close()">Close &times;</a>
-  <a href="#" id="viewIndividualPost">View an individual post</a> 
-  <a href="#">Create a simple post</a> 
-  <a href="#">Update a simple post</a> 
-  <a href="#">delete a simple post</a> 
-</nav>
-
 <div class="w3-container"> 
-            <input class="w3-input w3-border w3-padding" type="text" placeholder="Search for blogs.." id="myInput">
-            		<ul id="id01" class="w3-ul w3-border">
-                 	   <li>Each blog</li>
-		        </ul>  
+            <div class="w3-left-align"><p>Welcome !! Click on menu to do different activities.</p></div>
 </div>
 {% include 'footer.twig' %}

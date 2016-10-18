@@ -2,15 +2,12 @@
 <html>
     <head>
         <title>Micro Blog</title>
-
-        <!--
-         - Include you stylesheets and javascripts in here
-         - Load from /assets/javascripts and /assets/stylesheets  
-         - Try to avoid inline javascript and css if you can
-        -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="/assets/css/w3.css">
         <script type="text/javascript" src="/assets/javascripts/functionality1.js"></script> 
+        <script type="text/javascript" src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/blog_controller9.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/w3data14.js"></script> 
     </head>
     <body>
 <div class="w3-container w3-teal">
@@ -20,9 +17,12 @@
 <!-- Side Navigation -->
 <nav class="w3-sidenav w3-white" style="display:none" id="mySidenav">
   <a href="javascript:void(0)" class="w3-closenav w3-large" id="mySideNavClose" onclick="w3_close()">Close &times;</a>
-  <a href="/api/posts" id="viewAllPosts">View all posts</a>
+  <a href="/api/formattedposts/twig" id="viewAllPosts">View all posts</a>
+  <a href="/api/formattedusers/twig" id="viewAllUsers">View all users</a>
   <a href="#" id="viewIndividualPost">View an individual post</a> 
-  <a href="#">Create a simple post</a> 
+  <a href="/api/prepareNewPost/twig">Create a simple post</a> 
   <a href="#">Update a simple post</a> 
-  <a href="#">delete a simple post</a> 
+  <a href="#">Delete a simple post</a> 
 </nav>
+
+
