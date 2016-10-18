@@ -84,7 +84,7 @@ $app->get('/api/prepareNewPost/{format}', function($format) use($app) {
         return $app['twig']->render('create.post.twig', array('users' => null, ));
     }
     if ($format == 'twig'){
-		return $app['twig']->render('create.post.twig', array('users' => $posts, ));
+		return $app['twig']->render('create.post.twig', array('users' => $posts,'message' => 'Create simple post' ));
 	} 
 	return $app->json($post, 200);
 });
@@ -241,7 +241,7 @@ $app->get('/api/postid', function() use($app) {
     return $app->json($posts, 200);
 });
 
-$app->get('/api/formatted/postid/twig', function($format) use($app) {
+$app->get('/api/formatted/postid/{format}', function($format) use($app) {
     $sql = "SELECT rowid FROM posts";
     $posts = $app['db']->fetchAll($sql);
     if (count($posts) == 0) {
