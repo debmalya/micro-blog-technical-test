@@ -2,7 +2,6 @@
 
 // Silex documentation: http://silex.sensiolabs.org/doc/
 require_once __DIR__ . '/../vendor/autoload.php';
-// include 'User.php';
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +10,6 @@ use Doctrine\DBAL\Schema\Table;
 $app = new Silex\Application();
 
 $app['debug'] = true;
-
 
 $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
     'db.options' => array(
@@ -178,6 +176,15 @@ $app->post('/api/posts/new', function (Request $request) use ($app) {
     return $app->json($posts, 200);
 });
 
+$app->post('/api/formattedposts/new', function (Request $request) use ($app) {
+	$user_id = $request->request->get('user_id');
+	$content = $request->request->get('content');
+	
+    $app['db']->insert('posts', array( 'content' => $content, 'user_id' =>
+    (int)$user_id, 'date' => time()));
+    return $app['twig']->render('index.twig', array('message'=>'Blog created successfully.'));
+});
+
 
 /**
  * To update existing post.
@@ -188,7 +195,7 @@ $app->put('/api/posts/update', function (Request $request) use ($app){
     $post_id = $request->request->get('post_id');
     $content = $request->request->get('content');
     $sql = "UPDATE posts SET content = :content WHERE rowid = :rowid";
-    $app['db']->executeUpdate($sql, array(':content', (String) $content,':rowid',(int)$post_id));
+	$app['db']->executeUpdate($sql, array($content,(int)$post_id));
     $posts = array('message' => 'Blog id $post_id updated successfully.');   
     return $app->json($posts, 200);
 }); 
@@ -205,6 +212,18 @@ $app->delete('/api/posts/delete', function (Request $request) use ($app){
     return $app->json($posts, 200);
 });
 
+/**
+ * To delete existing post.
+ * From request parameter get post_id and content.
+ * Then update them into posts table.
+ */
+$app->delete('/api/formattedposts/delete/', function (Request $request) use ($app){
+    $post_id = $request->request->get('post_id');
+	$app['db']->delete('posts', array( 'rowid' => (int)$post_id,));
+    $posts = array('message' => 'Blog id deleted successfully.','rowid'=>$post_id);   
+    return $app['twig']->render('index.twig', array('message'=>'Blog id deleted successfully.'));
+});
+
 $app->get('/api/postid', function() use($app) {
     $sql = "SELECT rowid FROM posts";
     $posts = $app['db']->fetchAll($sql);
@@ -215,7 +234,7 @@ $app->get('/api/postid', function() use($app) {
     return $app->json($posts, 200);
 });
 
-$app->get('/api/formatted/postid/{format}', function($format) use($app) {
+$app->get('/api/formatted/postid/twig', function($format) use($app) {
     $sql = "SELECT rowid FROM posts";
     $posts = $app['db']->fetchAll($sql);
     if (count($posts) == 0) {
@@ -237,7 +256,7 @@ $app->get('/api/formatted/postid/update/{format}', function($format) use($app) {
     if ($format == 'twig'){
     	return $app['twig']->render('single_blog.update.twig', array('posts' => $posts, 'message'=>'Update a simple post'));
     }
-    return $app->json($posts, 200);
+    return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
 });
 
 $app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
