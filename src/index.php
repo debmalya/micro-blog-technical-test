@@ -2,7 +2,7 @@
 
 // Silex documentation: http://silex.sensiolabs.org/doc/
 require_once __DIR__ . '/../vendor/autoload.php';
-include 'User.php';
+// include 'User.php';
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,7 +59,7 @@ $app->get('/api/formattedposts/{format}', function($format) use($app) {
         return new Response("There is no post.", 404);
     }
     if ($format == 'twig') {
-		return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
+		return $app['twig']->render('blogs.twig', array('posts' => $posts, 'message'=>'View all posts'));
 	}
 	return $app->json($post, 200);
 });
@@ -69,11 +69,10 @@ $app->get('/api/formattedusers/{format}', function($format) use($app) {
     $posts = $app['db']->fetchAll($sql);
 
     if (count($posts) == 0) {
-        //return new Response("Currently no user is configured.", 404);
-        return $app['twig']->render('user.link.twig', array('users' => null, ));
+        return $app['twig']->render('user.link.twig', array('users' => null, 'message'=>'View all users'));
     }
     if ($format == 'twig'){
-		return $app['twig']->render('user.link.twig', array('users' => $posts, ));
+		return $app['twig']->render('user.link.twig', array('users' => $posts, 'message'=>'View all users'));
 	} 
 	return $app->json($post, 200);
 });
@@ -175,7 +174,7 @@ $app->post('/api/posts/new', function (Request $request) use ($app) {
 	
     $app['db']->insert('posts', array( 'content' => $content, 'user_id' =>
     (int)$user_id, 'date' => time()));
-//     $posts = array('message' => 'Blog created successfully.');   
+    $posts = array('message' => 'Blog created successfully.');   
     return $app->json($posts, 200);
 });
 
@@ -188,8 +187,10 @@ $app->post('/api/posts/new', function (Request $request) use ($app) {
 $app->put('/api/posts/update', function (Request $request) use ($app){
     $post_id = $request->request->get('post_id');
     $content = $request->request->get('content');
-    $sql = "UPDATE posts SET content = ? WHERE post_id = ?";
-    $app['db']->executeUpdate($sql, array('newContent', (String) $content,'existingPostId',$post_id));
+    $sql = "UPDATE posts SET content = :content WHERE rowid = :rowid";
+    $app['db']->executeUpdate($sql, array(':content', (String) $content,':rowid',(int)$post_id));
+    $posts = array('message' => 'Blog id $post_id updated successfully.');   
+    return $app->json($posts, 200);
 }); 
 
 /**
@@ -199,10 +200,57 @@ $app->put('/api/posts/update', function (Request $request) use ($app){
  */
 $app->delete('/api/posts/delete', function (Request $request) use ($app){
     $post_id = $request->request->get('post_id');
-    $sql = "DELETE from posts WHERE post_id = ?";
-    $app['db']->executeUpdate($sql, array('existingPostId', (int) $post_id));
+	$app['db']->delete('posts', array( 'rowid' => (int)$post_id,));
+    $posts = array('message' => 'Blog id deleted successfully.','rowid'=>$post_id);   
+    return $app->json($posts, 200);
 });
 
+$app->get('/api/postid', function() use($app) {
+    $sql = "SELECT rowid FROM posts";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    
+    return $app->json($posts, 200);
+});
+
+$app->get('/api/formatted/postid/{format}', function($format) use($app) {
+    $sql = "SELECT rowid FROM posts";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    if ($format == 'twig'){
+    	return $app['twig']->render('single_blog.view.twig', array('posts' => $posts, 'message'=>'View Individual Blog'));
+    }
+    return $app->json($posts, 200);
+});
+
+
+$app->get('/api/formatted/postid/update/{format}', function($format) use($app) {
+    $sql = "SELECT rowid FROM posts";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    if ($format == 'twig'){
+    	return $app['twig']->render('single_blog.update.twig', array('posts' => $posts, 'message'=>'Update a simple post'));
+    }
+    return $app->json($posts, 200);
+});
+
+$app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
+    $sql = "SELECT rowid FROM posts";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    if ($format == 'twig'){
+    	return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message'=>'Delete a simple post'));
+    }
+    return $app->json($posts, 200);
+});
 
 
 /* ------- micro-blog web app ---------
@@ -220,6 +268,7 @@ $app->get('/', function() use($app) {
 });
 
 $app->error(function (\Exception $e, $code) {
+// return $app['twig']->render('error.twig',array('error_code'=> $code,'error_message'=>$e->getMessage());
     return new Response('I am sorry, but something went terribly wrong.' . " Error Code :" . $code . " Error message :" . $e->getMessage());
 });
 
