@@ -49,6 +49,16 @@ $app->get('/api/posts', function() use($app) {
     return $app->json($posts, 200);
 });
 
+$app->get('/api/posts/range/{from}/{to}', function($from,$to) use($app) {
+    $sql = "SELECT rowid, * FROM posts where rowid >= ? and rowid <= ?";
+    $posts = $app['db']->fetchAll($sql, array((int) $from,(int) $to));
+    if (count($posts) == 0) {
+        return new Response("There is no record.", 404);
+    }
+    
+    return $app->json($posts, 200);
+});
+
 $app->get('/api/formattedposts/{format}', function($format) use($app) {
     $sql = "SELECT rowid, * FROM posts";
     $posts = $app['db']->fetchAll($sql);
