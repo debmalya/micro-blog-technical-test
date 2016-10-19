@@ -49,6 +49,32 @@ $app->get('/api/posts', function() use($app) {
     return $app->json($posts, 200);
 });
 
+/**
+ * Get total number of posts.
+ */
+$app->get('/api/posts/total', function() use($app) {
+    $sql = "SELECT count(*) FROM posts";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    
+    return $app->json($posts, 200);
+});
+
+/**
+ * Get total number of posts group by user
+ */
+$app->get('/api/posts/group_by_user', function() use($app) {
+    $sql = "SELECT user_id,count(*) FROM posts group by user_id";
+    $posts = $app['db']->fetchAll($sql);
+    if (count($posts) == 0) {
+        return new Response("There is no post.", 404);
+    }
+    
+    return $app->json($posts, 200);
+});
+
 $app->get('/api/posts/range/{from}/{to}', function($from,$to) use($app) {
     $sql = "SELECT rowid, * FROM posts where rowid >= ? and rowid <= ?";
     $posts = $app['db']->fetchAll($sql, array((int) $from,(int) $to));
@@ -113,7 +139,7 @@ $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
 $app->get('/api/posts/formatteduser/{user_id}/{format}', function($user_id,$format) use($app) {
     $sql = "SELECT rowid, * FROM posts WHERE user_id = ?";
     $posts = $app['db']->fetchAll($sql, array((int) $user_id));
-    // Create user table
+    // Create user table, if does not exist
     $schema = $app['db']->getSchemaManager();
     if (!$schema->tablesExist('users')) {
     	$users = new Table('users');
@@ -129,9 +155,7 @@ $app->get('/api/posts/formatteduser/{user_id}/{format}', function($user_id,$form
     	$app['db']->insert('users', array( 'user_name' => 'User3',));
     	$app['db']->insert('users', array( 'user_name' => 'User4',));
     }
-    if (count($posts) == 0) {
-        return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
-    }
+    
 
     if ($format == 'twig'){
     	return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
@@ -237,8 +261,8 @@ $app->delete('/api/posts/delete', function (Request $request) use ($app){
 $app->delete('/api/formattedposts/delete/', function (Request $request) use ($app){
     $post_id = $request->request->get('post_id');
 	$app['db']->delete('posts', array( 'rowid' => (int)$post_id,));
-    $posts = array('message' => 'Blog id deleted successfully.','rowid'=>$post_id);   
-    return $app['twig']->render('index.twig', array('message'=>'Blog id deleted successfully.'));
+    $posts = array('message' => 'Blog deleted successfully.','rowid'=>$post_id);   
+    return $app['twig']->render('index.twig', array('message'=>'Blog deleted successfully.'));
 });
 
 $app->get('/api/postid', function() use($app) {
