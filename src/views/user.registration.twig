@@ -1,0 +1,16 @@
+{% include 'header_without_menu.twig' %}        
+{% from 'form.html' import input as input_field %} 
+ <form id="registrationForm" method="POST" action="/api/formattedusers/new">
+ <div align="center">
+ <dl>
+ 	<dt>Username</dt>
+	<dd>{{ input_field('user_name') }}</dd>
+	<dt>Password</dt>
+	<dd>{{ input_field('password', '', 'password') }}</dd> 
+</dl>
+</div>
+<div align="center">
+<input type="submit" value="Register"  class="w3-btn-block w3-ripple w3-teal"/>
+</div>
+</form>
+{% include 'footer.twig' %}

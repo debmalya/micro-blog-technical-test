@@ -139,24 +139,7 @@ $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
 $app->get('/api/posts/formatteduser/{user_id}/{format}', function($user_id,$format) use($app) {
     $sql = "SELECT rowid, * FROM posts WHERE user_id = ?";
     $posts = $app['db']->fetchAll($sql, array((int) $user_id));
-    // Create user table, if does not exist
-    $schema = $app['db']->getSchemaManager();
-    if (!$schema->tablesExist('users')) {
-    	$users = new Table('users');
-    	$users->addColumn('user_id', 'integer', array('unsigned' => false, 'autoincrement' => true));
-    	$users->setPrimaryKey(array('user_id'));
-    	$users->addColumn('user_name', 'string', array('length' => 32));
-    	$users->addUniqueIndex(array('user_name'));
-    	$schema->createTable($users);
-    	
-    	// insert sample rows
-    	$app['db']->insert('users', array( 'user_name' => 'User1',));
-    	$app['db']->insert('users', array( 'user_name' => 'User2',));
-    	$app['db']->insert('users', array( 'user_name' => 'User3',));
-    	$app['db']->insert('users', array( 'user_name' => 'User4',));
-    }
     
-
     if ($format == 'twig'){
     	return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
     }
@@ -219,7 +202,68 @@ $app->post('/api/formattedposts/new', function (Request $request) use ($app) {
     return $app['twig']->render('index.twig', array('message'=>'Blog created successfully.'));
 });
 
+/**
+ * To create new user.
+ * From request parameter get user_id and password.
+ * Then insert them into users table.
+ */
+$app->post('/api/users/new', function (Request $request) use ($app) {
+	$user_name = $request->request->get('user_name');
+	$password = $request->request->get('password');
+	
+    $app['db']->insert('users', array( 'user_name' =>$user_name,'password' => $password));
+    $posts = array('message' => 'User created successfully.');   
+    return $app->json($posts, 200);
+});
 
+
+
+$app->post('/api/formattedusers/new', function (Request $request) use ($app) {
+	$user_name = $request->request->get('user_name');
+	$password = $request->request->get('password');
+	
+    $app['db']->insert('users', array( 'user_name' =>$user_name,'password' => $password));
+    return $app['twig']->render('login.twig', array('message'=>'User registration successful. Please login to continue.'));
+});
+
+$app->get('/api/userregistration/set', function() use($app) {
+   return $app['twig']->render('user.registration.twig', array('message' => "Register" ));
+
+    
+});
+
+/**
+ * Validate user
+ */
+$app->post('/api/login/validate', function (Request $request) use ($app) {
+	$user_name = $request->request->get('user_name');
+	$password = $request->request->get('password');
+	
+	$sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
+	$posts = $app['db']->fetchAll($sql, array( $user_name, $password));
+    if (!$posts){
+    	$posts = array('message' => 'Login failed'); 
+    } else {
+   	 	$posts = array('message' => 'Login Successful');  
+    } 
+    return $app->json($posts, 200);
+});
+
+/**
+ * Validate user and return to the main application menu.
+ */
+$app->post('/api/formattedlogin/validate', function (Request $request) use ($app) {
+	$user_name = $request->request->get('user_name');
+	$password = $request->request->get('password');
+	$sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
+	$posts = $app['db']->fetchAll($sql, array( $user_name, $password));
+    if (!$posts){ 
+    	return $app['twig']->render('login.twig', array('message'=>'Either username or password is wrong.'));
+    } else {
+   	 	return $app['twig']->render('index.twig', array('message'=>'Welcome.')); 
+    } 
+    
+});
 /**
  * To update existing post.
  * From request parameter get post_id and content.
@@ -324,12 +368,29 @@ $app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
  */
 
 $app->get('/', function() use($app) {
-    return $app['twig']->render('index.twig');
+    //return $app['twig']->render('index.twig');
+    // Create user table, if does not exist
+    $schema = $app['db']->getSchemaManager();
+    if (!$schema->tablesExist('users')) {
+    	$users = new Table('users');
+    	$users->addColumn('user_id', 'integer', array('unsigned' => false, 'autoincrement' => true));
+    	$users->setPrimaryKey(array('user_id'));
+    	$users->addColumn('user_name', 'string', array('length' => 32));
+    	$users->addUniqueIndex(array('user_name'));
+    	$users->addColumn('password', 'string', array('length' => 255));
+    	$schema->createTable($users);
+    	
+    	// insert sample rows
+    	$app['db']->insert('users', array( 'user_name' => 'User1','password'=>'User1'));
+    	$app['db']->insert('users', array( 'user_name' => 'User2','password'=>'User2'));
+    	$app['db']->insert('users', array( 'user_name' => 'User3','password'=>'User3'));
+    	$app['db']->insert('users', array( 'user_name' => 'User4','password'=>'User4'));
+    } 
+    return $app['twig']->render('login.twig',array('message'=>'Welcome'));
 });
 
 $app->error(function (\Exception $e, $code) {
-// return $app['twig']->render('error.twig',array('error_code'=> $code,'error_message'=>$e->getMessage());
-    return new Response('I am sorry, but something went terribly wrong.' . " Error Code :" . $code . " Error message :" . $e->getMessage());
+    return new Response('I am sorry, but something went terribly wrong.<br>' . " Error Code :" . $code . "<br> Error message :" . $e->getMessage());
 });
 
 Request::enableHttpMethodParameterOverride();
