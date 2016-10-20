@@ -23,6 +23,8 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => __DIR__ . '/views',
 ));
 
+$app->register(new Silex\Provider\SessionServiceProvider());
+
 
 /* ------- micro-blog api ---------
 
@@ -45,7 +47,7 @@ $app->get('/api/posts', function() use($app) {
     if (count($posts) == 0) {
         return new Response("There is no post.", 404);
     }
-    
+
     return $app->json($posts, 200);
 });
 
@@ -58,7 +60,7 @@ $app->get('/api/posts/total', function() use($app) {
     if (count($posts) == 0) {
         return new Response("There is no post.", 404);
     }
-    
+
     return $app->json($posts, 200);
 });
 
@@ -71,17 +73,17 @@ $app->get('/api/posts/group_by_user', function() use($app) {
     if (count($posts) == 0) {
         return new Response("There is no post.", 404);
     }
-    
+
     return $app->json($posts, 200);
 });
 
-$app->get('/api/posts/range/{from}/{to}', function($from,$to) use($app) {
+$app->get('/api/posts/range/{from}/{to}', function($from, $to) use($app) {
     $sql = "SELECT rowid, * FROM posts where rowid >= ? and rowid <= ?";
-    $posts = $app['db']->fetchAll($sql, array((int) $from,(int) $to));
+    $posts = $app['db']->fetchAll($sql, array((int) $from, (int) $to));
     if (count($posts) == 0) {
         return new Response("There is no record.", 404);
     }
-    
+
     return $app->json($posts, 200);
 });
 
@@ -93,9 +95,9 @@ $app->get('/api/formattedposts/{format}', function($format) use($app) {
         return new Response("There is no post.", 404);
     }
     if ($format == 'twig') {
-		return $app['twig']->render('blogs.twig', array('posts' => $posts, 'message'=>'View all posts'));
-	}
-	return $app->json($post, 200);
+        return $app['twig']->render('blogs.twig', array('posts' => $posts, 'message' => 'View all posts'));
+    }
+    return $app->json($post, 200);
 });
 
 $app->get('/api/formattedusers/{format}', function($format) use($app) {
@@ -103,12 +105,12 @@ $app->get('/api/formattedusers/{format}', function($format) use($app) {
     $posts = $app['db']->fetchAll($sql);
 
     if (count($posts) == 0) {
-        return $app['twig']->render('user.link.twig', array('users' => null, 'message'=>'View all users'));
+        return $app['twig']->render('user.link.twig', array('users' => null, 'message' => 'View all users'));
     }
-    if ($format == 'twig'){
-		return $app['twig']->render('user.link.twig', array('users' => $posts, 'message'=>'View all users'));
-	} 
-	return $app->json($post, 200);
+    if ($format == 'twig') {
+        return $app['twig']->render('user.link.twig', array('users' => $posts, 'message' => 'View all users'));
+    }
+    return $app->json($post, 200);
 });
 
 $app->get('/api/prepareNewPost/{format}', function($format) use($app) {
@@ -117,12 +119,12 @@ $app->get('/api/prepareNewPost/{format}', function($format) use($app) {
 
     if (count($posts) == 0) {
         //return new Response("Currently no user is configured.", 404);
-        return $app['twig']->render('create.post.twig', array('users' => null, ));
+        return $app['twig']->render('create.post.twig', array('users' => null,));
     }
-    if ($format == 'twig'){
-		return $app['twig']->render('create.post.twig', array('users' => $posts,'message' => 'Create simple post' ));
-	} 
-	return $app->json($post, 200);
+    if ($format == 'twig') {
+        return $app['twig']->render('create.post.twig', array('users' => $posts, 'message' => 'Create simple post'));
+    }
+    return $app->json($post, 200);
 });
 
 $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
@@ -136,12 +138,12 @@ $app->get('/api/posts/user/{user_id}', function($user_id) use($app) {
 
 
 
-$app->get('/api/posts/formatteduser/{user_id}/{format}', function($user_id,$format) use($app) {
+$app->get('/api/posts/formatteduser/{user_id}/{format}', function($user_id, $format) use($app) {
     $sql = "SELECT rowid, * FROM posts WHERE user_id = ?";
     $posts = $app['db']->fetchAll($sql, array((int) $user_id));
-    
-    if ($format == 'twig'){
-    	return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
+
+    if ($format == 'twig') {
+        return $app['twig']->render('blogs.twig', array('posts' => $posts,));
     }
     return $app->json($post, 200);
 })->assert('user_id', '\d+');
@@ -157,24 +159,23 @@ $app->get('/api/posts/id/{post_id}', function($post_id) use($app) {
     }
 
     return $app->json($post, 200);
-    
 })->assert('post_id', '\d+');
 
 /**
  * To get existing post in a specific format.
  */
-$app->get('/api/formattedposts/id/{post_id}', function($post_id,$format) use($app) {
+$app->get('/api/formattedposts/id/{post_id}', function($post_id, $format) use($app) {
     $sql = "SELECT rowid, * FROM posts WHERE rowid = ?";
     $post = $app['db']->fetchAssoc($sql, array((int) $post_id));
 
     if (!$post) {
-        return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
+        return $app['twig']->render('blogs.twig', array('posts' => $posts,));
     }
 
     if ($format == 'twig') {
-    	return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
+        return $app['twig']->render('blogs.twig', array('posts' => $posts,));
     } else {
-    	return $app->json($post, 200);
+        return $app->json($post, 200);
     }
 })->assert('post_id', '\d+');
 
@@ -184,22 +185,22 @@ $app->get('/api/formattedposts/id/{post_id}', function($post_id,$format) use($ap
  * Then insert them into posts table.
  */
 $app->post('/api/posts/new', function (Request $request) use ($app) {
-	$user_id = $request->request->get('user_id');
-	$content = $request->request->get('content');
-	
-    $app['db']->insert('posts', array( 'content' => $content, 'user_id' =>
-    (int)$user_id, 'date' => time()));
-    $posts = array('message' => 'Blog created successfully.');   
+    $user_id = $request->request->get('user_id');
+    $content = $request->request->get('content');
+
+    $app['db']->insert('posts', array('content' => $content, 'user_id' =>
+        (int) $user_id, 'date' => time()));
+    $posts = array('message' => 'Blog created successfully.');
     return $app->json($posts, 200);
 });
 
 $app->post('/api/formattedposts/new', function (Request $request) use ($app) {
-	$user_id = $request->request->get('user_id');
-	$content = $request->request->get('content');
-	
-    $app['db']->insert('posts', array( 'content' => $content, 'user_id' =>
-    (int)$user_id, 'date' => time()));
-    return $app['twig']->render('index.twig', array('message'=>'Blog created successfully.'));
+    $user_id = $app['session']->get('user')['user_id'];
+    $content = $request->request->get('content');
+
+    $app['db']->insert('posts', array('content' => $content, 'user_id' =>
+        (int) $user_id, 'date' => time()));
+    return $app['twig']->render('index.twig', array('message' => 'Blog created successfully.'));
 });
 
 /**
@@ -208,44 +209,42 @@ $app->post('/api/formattedposts/new', function (Request $request) use ($app) {
  * Then insert them into users table.
  */
 $app->post('/api/users/new', function (Request $request) use ($app) {
-	$user_name = $request->request->get('user_name');
-	$password = $request->request->get('password');
-	
-    $app['db']->insert('users', array( 'user_name' =>$user_name,'password' => $password));
-    $posts = array('message' => 'User created successfully.');   
+    $user_name = $request->request->get('user_name');
+    $password = $request->request->get('password');
+
+    $app['db']->insert('users', array('user_name' => $user_name, 'password' => $password));
+    $posts = array('message' => 'User created successfully.');
     return $app->json($posts, 200);
 });
 
 
 
 $app->post('/api/formattedusers/new', function (Request $request) use ($app) {
-	$user_name = $request->request->get('user_name');
-	$password = $request->request->get('password');
-	
-    $app['db']->insert('users', array( 'user_name' =>$user_name,'password' => $password));
-    return $app['twig']->render('login.twig', array('message'=>'User registration successful. Please login to continue.'));
+    $user_name = $request->request->get('user_name');
+    $password = $request->request->get('password');
+
+    $app['db']->insert('users', array('user_name' => $user_name, 'password' => $password));
+    return $app['twig']->render('login.twig', array('message' => 'User registration successful. Please login to continue.'));
 });
 
 $app->get('/api/userregistration/set', function() use($app) {
-   return $app['twig']->render('user.registration.twig', array('message' => "Register" ));
-
-    
+    return $app['twig']->render('user.registration.twig', array('message' => "Register"));
 });
 
 /**
  * Validate user
  */
 $app->post('/api/login/validate', function (Request $request) use ($app) {
-	$user_name = $request->request->get('user_name');
-	$password = $request->request->get('password');
-	
-	$sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
-	$posts = $app['db']->fetchAll($sql, array( $user_name, $password));
-    if (!$posts){
-    	$posts = array('message' => 'Login failed'); 
+    $user_name = $request->request->get('user_name');
+    $password = $request->request->get('password');
+
+    $sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
+    $posts = $app['db']->fetchAll($sql, array($user_name, $password));
+    if (!$posts) {
+        $posts = array('message' => 'Login failed');
     } else {
-   	 	$posts = array('message' => 'Login Successful');  
-    } 
+        $posts = array('message' => 'Login Successful');
+    }
     return $app->json($posts, 200);
 });
 
@@ -253,47 +252,47 @@ $app->post('/api/login/validate', function (Request $request) use ($app) {
  * Validate user and return to the main application menu.
  */
 $app->post('/api/formattedlogin/validate', function (Request $request) use ($app) {
-	$user_name = $request->request->get('user_name');
-	$password = $request->request->get('password');
-	$sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
-	$posts = $app['db']->fetchAll($sql, array( $user_name, $password));
-    if (!$posts){ 
-    	return $app['twig']->render('login.twig', array('message'=>'Either username or password is wrong.'));
+    $user_name = $request->request->get('user_name');
+    $password = $request->request->get('password');
+    $sql = "SELECT rowid, * FROM users WHERE user_name = ? and password = ?";
+    $posts = $app['db']->fetchAll($sql, array($user_name, $password));
+    if (!$posts) {
+        return $app['twig']->render('login.twig', array('message' => 'Either username or password is wrong.'));
     } else {
-   	 	return $app['twig']->render('index.twig', array('message'=>'Welcome.')); 
-    } 
-    
+        $app['session']->set('user', array('user_id' => $posts[0]['user_id'], 'user_name' => $user_name,));
+        return $app['twig']->render('index.twig', array('message' => 'Welcome ' . $app['session']->get('user')['user_name']));
+    }
 });
 /**
  * To update existing post.
  * From request parameter get post_id and content.
  * Then update them into posts table.
  */
-$app->put('/api/posts/update', function (Request $request) use ($app){
+$app->put('/api/posts/update', function (Request $request) use ($app) {
     $post_id = $request->request->get('post_id');
     $content = $request->request->get('content');
     $sql = "UPDATE posts SET content = :content WHERE rowid = :rowid";
-	$app['db']->executeUpdate($sql, array($content,(int)$post_id));
-    $posts = array('message' => 'Blog id $post_id updated successfully.');   
+    $app['db']->executeUpdate($sql, array($content, (int) $post_id));
+    $posts = array('message' => 'Blog updated successfully.');
     return $app->json($posts, 200);
-}); 
+});
 
-$app->put('/api/formattedposts/update', function (Request $request) use ($app){
+$app->put('/api/formattedposts/update', function (Request $request) use ($app) {
     $post_id = $request->request->get('post_id');
     $content = $request->request->get('content');
     $sql = "UPDATE posts SET content = :content WHERE rowid = :rowid";
-	$app['db']->executeUpdate($sql, array($content,(int)$post_id));
-    return $app['twig']->render('index.twig', array('message'=>'Blog updated successfully.'));
-}); 
+    $app['db']->executeUpdate($sql, array($content, (int) $post_id));
+    return $app['twig']->render('index.twig', array('message' => 'Hi ' . $app['session']->get('user')['user_name'] . '! Blog updated successfully,'));
+});
 /**
  * To delete existing post.
  * From request parameter get post_id and content.
  * Then update them into posts table.
  */
-$app->delete('/api/posts/delete', function (Request $request) use ($app){
+$app->delete('/api/posts/delete', function (Request $request) use ($app) {
     $post_id = $request->request->get('post_id');
-	$app['db']->delete('posts', array( 'rowid' => (int)$post_id,));
-    $posts = array('message' => 'Blog id deleted successfully.','rowid'=>$post_id);   
+    $app['db']->delete('posts', array('rowid' => (int) $post_id,));
+    $posts = array('message' => 'Blog id deleted successfully.', 'rowid' => $post_id);
     return $app->json($posts, 200);
 });
 
@@ -302,11 +301,11 @@ $app->delete('/api/posts/delete', function (Request $request) use ($app){
  * From request parameter get post_id and content.
  * Then update them into posts table.
  */
-$app->delete('/api/formattedposts/delete/', function (Request $request) use ($app){
+$app->delete('/api/formattedposts/delete/', function (Request $request) use ($app) {
     $post_id = $request->request->get('post_id');
-	$app['db']->delete('posts', array( 'rowid' => (int)$post_id,));
-    $posts = array('message' => 'Blog deleted successfully.','rowid'=>$post_id);   
-    return $app['twig']->render('index.twig', array('message'=>'Blog deleted successfully.'));
+    $app['db']->delete('posts', array('rowid' => (int) $post_id,));
+    $posts = array('message' => 'Blog deleted successfully.', 'rowid' => $post_id);
+    return $app['twig']->render('index.twig', array('message' => $app['session']->get('user')['user_name'] . ' Your blog deleted successfully.'));
 });
 
 $app->get('/api/postid', function() use($app) {
@@ -315,43 +314,45 @@ $app->get('/api/postid', function() use($app) {
     if (count($posts) == 0) {
         return new Response("There is no post.", 404);
     }
-    
+
     return $app->json($posts, 200);
 });
 
 $app->get('/api/formatted/postid/{format}', function($format) use($app) {
-    $sql = "SELECT rowid FROM posts";
-    $posts = $app['db']->fetchAll($sql);
+    $sql = "SELECT rowid,* FROM posts where user_id =  ?";
+    $posts = $app['db']->fetchAll($sql, array($app['session']->get('user')['user_id']));
     if (count($posts) == 0) {
-        return new Response("There is no post.", 404);
+//        return new Response("There is no post.", 404);
+        return $app['twig']->render('blogs.twig', array('posts' => $posts, 'message' => 'There is no post now, ' . $app['session']->get('user')['user_name']));
     }
-    if ($format == 'twig'){
-    	return $app['twig']->render('single_blog.view.twig', array('posts' => $posts, 'message'=>'View Individual Blog'));
+    if ($format == 'twig') {
+        return $app['twig']->render('blogs.twig', array('posts' => $posts, 'message' => 'View your individual blog , ' . $app['session']->get('user')['user_name']));
     }
     return $app->json($posts, 200);
 });
 
 
 $app->get('/api/formatted/postid/update/{format}', function($format) use($app) {
-    $sql = "SELECT rowid FROM posts";
-    $posts = $app['db']->fetchAll($sql);
+    $sql = "SELECT rowid FROM posts where user_id = ?";
+    $posts = $app['db']->fetchAll($sql,array($app['session']->get('user')['user_id']));
     if (count($posts) == 0) {
-        return new Response("There is no post.", 404);
+        return $app['twig']->render('single_blog.update.twig', array('posts' => $posts, 'message' => 'There is no post to update now.'));
     }
-    if ($format == 'twig'){
-    	return $app['twig']->render('single_blog.update.twig', array('posts' => $posts, 'message'=>'Update a simple post'));
+    if ($format == 'twig') {
+        return $app['twig']->render('single_blog.update.twig', array('posts' => $posts, 'message' => 'Update a simple post'));
     }
-    return $app['twig']->render('blogs.twig', array('posts' => $posts, ));
+    return $app['twig']->render('blogs.twig', array('posts' => $posts,));
 });
 
 $app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
-    $sql = "SELECT rowid FROM posts";
-    $posts = $app['db']->fetchAll($sql);
+    $sql = "SELECT rowid FROM posts where user_id = ?";
+    $posts = $app['db']->fetchAll($sql,array($app['session']->get('user')['user_id']));
     if (count($posts) == 0) {
-        return new Response("There is no post.", 404);
+        //return new Response("There is no post.", 404);
+        return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message' => 'Currently there is not post to delete'));
     }
-    if ($format == 'twig'){
-    	return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message'=>'Delete a simple post'));
+    if ($format == 'twig') {
+        return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message' => 'Delete a simple post'));
     }
     return $app->json($posts, 200);
 });
@@ -367,29 +368,35 @@ $app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
   See TODO in index.twig for more instructions / suggestions
  */
 
+$app->get('/api/formatted/logout', function() use($app) {
+    $app['session']->clear();
+    return $app['twig']->render('login.twig', array('message' => 'Welcome'));
+});
+
 $app->get('/', function() use($app) {
     //return $app['twig']->render('index.twig');
     // Create user table, if does not exist
     $schema = $app['db']->getSchemaManager();
     if (!$schema->tablesExist('users')) {
-    	$users = new Table('users');
-    	$users->addColumn('user_id', 'integer', array('unsigned' => false, 'autoincrement' => true));
-    	$users->setPrimaryKey(array('user_id'));
-    	$users->addColumn('user_name', 'string', array('length' => 32));
-    	$users->addUniqueIndex(array('user_name'));
-    	$users->addColumn('password', 'string', array('length' => 255));
-    	$schema->createTable($users);
-    	
-    	// insert sample rows
-    	$app['db']->insert('users', array( 'user_name' => 'User1','password'=>'User1'));
-    	$app['db']->insert('users', array( 'user_name' => 'User2','password'=>'User2'));
-    	$app['db']->insert('users', array( 'user_name' => 'User3','password'=>'User3'));
-    	$app['db']->insert('users', array( 'user_name' => 'User4','password'=>'User4'));
-    } 
-    return $app['twig']->render('login.twig',array('message'=>'Welcome'));
+        $users = new Table('users');
+        $users->addColumn('user_id', 'integer', array('unsigned' => false, 'autoincrement' => true));
+        $users->setPrimaryKey(array('user_id'));
+        $users->addColumn('user_name', 'string', array('length' => 32));
+        $users->addUniqueIndex(array('user_name'));
+        $users->addColumn('password', 'string', array('length' => 255));
+        $schema->createTable($users);
+
+        // insert sample rows
+        $app['db']->insert('users', array('user_name' => 'User1', 'password' => 'User1'));
+        $app['db']->insert('users', array('user_name' => 'User2', 'password' => 'User2'));
+        $app['db']->insert('users', array('user_name' => 'User3', 'password' => 'User3'));
+        $app['db']->insert('users', array('user_name' => 'User4', 'password' => 'User4'));
+    }
+    return $app['twig']->render('login.twig', array('message' => 'Welcome'));
 });
 
 $app->error(function (\Exception $e, $code) {
+//    TODO put a link to the application
     return new Response('I am sorry, but something went terribly wrong.<br>' . " Error Code :" . $code . "<br> Error message :" . $e->getMessage());
 });
 

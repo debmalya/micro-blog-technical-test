@@ -1,7 +1,7 @@
 {% include 'header.twig' %}        
 <form class="w3-container" action="/api/formattedposts/update" method="POST" id="updateSimplePost">
-					<div align="center"><label>Select Post</label> 
             		{% if posts|length > 0 %}
+            			<div align="center"><label>Select Post</label>
             			<select id="post_id" class="w3-ul w3-border" name="post_id">
 								{% for post in posts %}
 									<option value="{{ post.rowid }}">{{ post.rowid }}</option>
@@ -16,7 +16,7 @@
 						<input type="submit" value="Update Post">
 					</div>
 					{% else %}
-						<p> No post available</p>
+						<div align="center"><p> No post available</p></div>
 					{% endif %} 
 					
 					
