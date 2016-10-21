@@ -349,7 +349,7 @@ $app->get('/api/formatted/postid/delete/{format}', function($format) use($app) {
     $posts = $app['db']->fetchAll($sql,array($app['session']->get('user')['user_id']));
     if (count($posts) == 0) {
         //return new Response("There is no post.", 404);
-        return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message' => 'Currently there is not post to delete'));
+        return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message' => 'Currently there is no post to delete'));
     }
     if ($format == 'twig') {
         return $app['twig']->render('single_blog.delete.twig', array('posts' => $posts, 'message' => 'Delete a simple post'));
